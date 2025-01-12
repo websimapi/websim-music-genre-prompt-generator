@@ -7,6 +7,9 @@
 <body>
   <div class="container">
     <h1>Music Genre Prompt Generator</h1>
+    <div class="sonauto-link">
+      Create your AI music at <a href="https://sonauto.ai" target="_blank" rel="noopener">sonauto.ai</a>
+    </div>
     
     <div class="categories-selection">
       <h2>Select Categories to Include:</h2>
@@ -31,6 +34,17 @@
       <div id="output" class="output-box" role="button" tabindex="0" title="Click to copy">
         <div class="output-text"></div>
         <div class="copy-tooltip">Click to copy</div>
+      </div>
+      
+      <div class="upload-section">
+        <h3>Share Your Creation</h3>
+        <p>Upload an audio file inspired by this prompt:</p>
+        <input type="file" id="audioUpload" accept="audio/*" class="file-input">
+        <button id="uploadBtn" class="upload-btn" disabled>Upload</button>
+      </div>
+
+      <div class="gallery" id="audioGallery">
+        <!-- Audio entries will be added here -->
       </div>
     </div>
   </div>

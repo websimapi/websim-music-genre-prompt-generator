@@ -435,6 +435,77 @@ document.addEventListener('DOMContentLoaded', function() {
     wordCountDisplay.textContent = this.value;
   });
 
+  // Add file upload functionality
+  const audioUpload = document.getElementById('audioUpload');
+  const uploadBtn = document.getElementById('uploadBtn');
+  let currentPrompt = '';
+  const room = new WebsimSocket();
+
+  audioUpload.addEventListener('change', function() {
+    uploadBtn.disabled = !this.files.length;
+  });
+
+  uploadBtn.addEventListener('click', async function() {
+    if (!audioUpload.files.length) return;
+    
+    const file = audioUpload.files[0];
+    try {
+      uploadBtn.disabled = true;
+      uploadBtn.textContent = 'Uploading...';
+      
+      // Upload the file to S3
+      const audioUrl = await websim.upload(file);
+      
+      // Create a record in the collection
+      await room.collection('audio_entries').create({
+        prompt: currentPrompt,
+        audioUrl: audioUrl,
+        timestamp: new Date().toISOString()
+      });
+      
+      audioUpload.value = '';
+      uploadBtn.textContent = 'Upload';
+      uploadBtn.disabled = true;
+      
+    } catch (error) {
+      console.error('Upload failed:', error);
+      uploadBtn.textContent = 'Upload Failed';
+      setTimeout(() => {
+        uploadBtn.textContent = 'Upload';
+        uploadBtn.disabled = false;
+      }, 2000);
+    }
+  });
+
+  // Subscribe to audio entries and update gallery
+  room.collection('audio_entries').subscribe(function(entries) {
+    const gallery = document.getElementById('audioGallery');
+    gallery.innerHTML = '';
+    
+    entries.sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      .forEach(entry => {
+        const audioEntry = document.createElement('div');
+        audioEntry.className = 'audio-entry';
+        
+        const prompt = document.createElement('div');
+        prompt.className = 'prompt';
+        prompt.textContent = entry.prompt;
+        
+        const audio = document.createElement('audio');
+        audio.controls = true;
+        audio.src = entry.audioUrl;
+        
+        const timestamp = document.createElement('div');
+        timestamp.className = 'timestamp';
+        timestamp.textContent = new Date(entry.created_at).toLocaleString();
+        
+        audioEntry.appendChild(prompt);
+        audioEntry.appendChild(audio);
+        audioEntry.appendChild(timestamp);
+        gallery.appendChild(audioEntry);
+      });
+  });
+
   // Generate button click handler
   document.getElementById('generateBtn').addEventListener('click', function() {
     const selectedCategories = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
@@ -447,6 +518,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const wordCount = parseInt(wordCountSlider.value);
     const output = generatePrompt(selectedCategories, allCategories, wordCount);
+    currentPrompt = output; // Store the current prompt
+    
     const outputElement = document.getElementById('output');
     const outputTextElement = outputElement.querySelector('.output-text');
     outputTextElement.textContent = output;
