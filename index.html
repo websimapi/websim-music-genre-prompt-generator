@@ -11,22 +11,51 @@
       Create your AI music at <a href="https://sonauto.ai" target="_blank" rel="noopener">sonauto.ai</a>
     </div>
     
-    <div class="categories-selection">
-      <h2>Select Categories to Include:</h2>
-      <div id="categoryCheckboxes" class="checkbox-grid">
-        <!-- Checkboxes will be dynamically added here -->
+    <div class="mode-switch">
+      <button id="simpleMode" class="mode-btn active">Simple Mode</button>
+      <button id="advancedMode" class="mode-btn">Advanced Mode</button>
+    </div>
+
+    <div id="simpleInterface" class="interface-container">
+      <div class="categories-selection">
+        <h2>Select Categories to Include:</h2>
+        <div id="categoryCheckboxes" class="checkbox-grid">
+          <!-- Checkboxes will be dynamically added here -->
+        </div>
+      </div>
+
+      <div class="word-count-control">
+        <h2>Number of Words to Combine: <span id="wordCountDisplay">3</span></h2>
+        <input type="range" id="wordCountSlider" min="2" max="6" value="3" class="slider">
+      </div>
+
+      <div class="controls">
+        <button id="generateBtn" class="generate-btn">Generate Prompt</button>
+        <button id="selectAllBtn" class="select-btn">Select All</button>
+        <button id="deselectAllBtn" class="select-btn">Deselect All</button>
       </div>
     </div>
 
-    <div class="word-count-control">
-      <h2>Number of Words to Combine: <span id="wordCountDisplay">3</span></h2>
-      <input type="range" id="wordCountSlider" min="2" max="6" value="3" class="slider">
-    </div>
-
-    <div class="controls">
-      <button id="generateBtn" class="generate-btn">Generate Prompt</button>
-      <button id="selectAllBtn" class="select-btn">Select All</button>
-      <button id="deselectAllBtn" class="select-btn">Deselect All</button>
+    <div id="advancedInterface" class="interface-container hidden">
+      <div class="categories-explorer">
+        <div class="category-list">
+          <h2>Categories</h2>
+          <div id="categoryList"></div>
+        </div>
+        <div class="subcategory-list">
+          <h2>Subcategories</h2>
+          <div id="subcategoryList"></div>
+        </div>
+        <div class="word-list">
+          <h2>Words</h2>
+          <div id="wordList"></div>
+        </div>
+      </div>
+      <div class="selected-words">
+        <h2>Selected Words</h2>
+        <div id="selectedWordsList"></div>
+        <button id="generateFromSelected" class="generate-btn">Generate from Selected</button>
+      </div>
     </div>
 
     <div class="output-section">
@@ -50,7 +79,7 @@
   </div>
   
   <script src="descriptors.js"></script>
-  <script src="generator.js"></script>
+  <script src="app.js"></script>
 <script defer src="https://static.cloudflareinsights.com/beacon.min.js/v8c78df7c7c0f484497ecbca7046644da1771523124516" integrity="sha512-8DS7rgIrAmghBFwoOTujcf6D9rXvH8xm8JQ1Ja01h9QX8EzXldiszufYa4IFfKdLUKTTrnSFXLDkUEOTrZQ8Qg==" data-cf-beacon='{"version":"2024.11.0","token":"4c6229722a6346bc8eb5cb0e5eae5d41","server_timing":{"name":{"cfCacheStatus":true,"cfEdge":true,"cfExtPri":true,"cfL4":true,"cfOrigin":true,"cfSpeedBrain":true},"location_startswith":null}}' crossorigin="anonymous"></script>
 </body>
 </html>

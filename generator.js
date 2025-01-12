@@ -506,6 +506,55 @@ document.addEventListener('DOMContentLoaded', function() {
       });
   });
 
+  // Add category dropdown population
+  const categorySelect = document.getElementById('categorySelect');
+  Object.keys(allCategories).forEach(category => {
+    const option = document.createElement('option');
+    option.value = category;
+    option.textContent = category;
+    categorySelect.appendChild(option);
+  });
+
+  // Handle category selection change
+  categorySelect.addEventListener('change', function() {
+    const selectedCategory = this.value;
+    const wordsListContainer = document.getElementById('wordsList');
+    wordsListContainer.innerHTML = '';
+
+    if (selectedCategory) {
+      const category = allCategories[selectedCategory];
+      Object.entries(category).forEach(([subcategory, words]) => {
+        // Add subcategory header
+        const headerDiv = document.createElement('div');
+        headerDiv.className = 'subcategory-header';
+        headerDiv.textContent = subcategory.charAt(0).toUpperCase() + subcategory.slice(1);
+        wordsListContainer.appendChild(headerDiv);
+
+        // Add words with checkboxes
+        words.forEach(word => {
+          const wordDiv = document.createElement('div');
+          wordDiv.className = 'word-item';
+          
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.id = `word-${word}`;
+          checkbox.checked = true; // Default to checked
+          checkbox.dataset.category = selectedCategory;
+          checkbox.dataset.subcategory = subcategory;
+          checkbox.dataset.word = word;
+          
+          const label = document.createElement('label');
+          label.htmlFor = checkbox.id;
+          label.textContent = word;
+          
+          wordDiv.appendChild(checkbox);
+          wordDiv.appendChild(label);
+          wordsListContainer.appendChild(wordDiv);
+        });
+      });
+    }
+  });
+
   // Generate button click handler
   document.getElementById('generateBtn').addEventListener('click', function() {
     const selectedCategories = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
@@ -527,6 +576,34 @@ document.addEventListener('DOMContentLoaded', function() {
     void outputElement.offsetWidth; // Trigger reflow
     outputElement.classList.add('animate');
   });
+
+  function generatePrompt(selectedCategories, allCategories, wordCount) {
+    const availableWords = [];
+    
+    selectedCategories.forEach(categoryName => {
+      const category = allCategories[categoryName];
+      Object.entries(category).forEach(([subcategory, words]) => {
+        words.forEach(word => {
+          const checkbox = document.querySelector(`input[data-category="${categoryName}"][data-subcategory="${subcategory}"][data-word="${word}"]`);
+          if (!checkbox || checkbox.checked) {
+            availableWords.push(word);
+          }
+        });
+      });
+    });
+
+    if (availableWords.length === 0) {
+      return "Please enable some words or select different categories";
+    }
+
+    const selectedWords = [];
+    for (let i = 0; i < wordCount; i++) {
+      const randomIndex = Math.floor(Math.random() * availableWords.length);
+      selectedWords.push(availableWords[randomIndex]);
+    }
+
+    return selectedWords.join(' ');
+  }
 
   // Clipboard functionality
   const outputBox = document.getElementById('output');
@@ -552,27 +629,3 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => checkbox.checked = false);
   });
 });
-
-function generatePrompt(selectedCategories, allCategories, wordCount) {
-  const selectedWords = [];
-  
-  // If wordCount is greater than available categories, we'll need to reuse some categories
-  const iterations = Math.min(wordCount, selectedCategories.length);
-  const shuffledCategories = selectedCategories.sort(() => Math.random() - 0.5);
-  
-  for (let i = 0; i < wordCount; i++) {
-    // Cycle through categories if we need more words than categories
-    const categoryName = shuffledCategories[i % iterations];
-    const category = allCategories[categoryName];
-    // Get a random subcategory
-    const subcategories = Object.keys(category);
-    const randomSubcategory = subcategories[Math.floor(Math.random() * subcategories.length)];
-    // Get a random word from the subcategory
-    const words = category[randomSubcategory];
-    const randomWord = words[Math.floor(Math.random() * words.length)];
-    selectedWords.push(randomWord);
-  }
-
-  // Shuffle the selected words and join them
-  return selectedWords.sort(() => Math.random() - 0.5).join(' ');
-}
