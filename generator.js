@@ -427,6 +427,14 @@ document.addEventListener('DOMContentLoaded', function() {
     checkboxContainer.appendChild(div);
   });
 
+  // Add word count slider functionality
+  const wordCountSlider = document.getElementById('wordCountSlider');
+  const wordCountDisplay = document.getElementById('wordCountDisplay');
+  
+  wordCountSlider.addEventListener('input', function() {
+    wordCountDisplay.textContent = this.value;
+  });
+
   // Generate button click handler
   document.getElementById('generateBtn').addEventListener('click', function() {
     const selectedCategories = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
@@ -437,12 +445,29 @@ document.addEventListener('DOMContentLoaded', function() {
       return;
     }
 
-    const output = generatePrompt(selectedCategories, allCategories);
+    const wordCount = parseInt(wordCountSlider.value);
+    const output = generatePrompt(selectedCategories, allCategories, wordCount);
     const outputElement = document.getElementById('output');
-    outputElement.textContent = output;
+    const outputTextElement = outputElement.querySelector('.output-text');
+    outputTextElement.textContent = output;
     outputElement.classList.remove('animate');
     void outputElement.offsetWidth; // Trigger reflow
     outputElement.classList.add('animate');
+  });
+
+  // Clipboard functionality
+  const outputBox = document.getElementById('output');
+  outputBox.addEventListener('click', async function() {
+    const text = this.querySelector('.output-text').textContent;
+    if (!text) return;
+    
+    try {
+      await navigator.clipboard.writeText(text);
+      this.classList.add('copied');
+      setTimeout(() => this.classList.remove('copied'), 500);
+    } catch (err) {
+      console.error('Failed to copy text:', err);
+    }
   });
 
   // Select/Deselect All buttons
@@ -455,15 +480,16 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 
-function generatePrompt(selectedCategories, allCategories) {
+function generatePrompt(selectedCategories, allCategories, wordCount) {
   const selectedWords = [];
   
-  // Get 2-3 random categories from the selected ones
-  const numCategories = Math.floor(Math.random() * 2) + 2; // 2-3 categories
+  // If wordCount is greater than available categories, we'll need to reuse some categories
+  const iterations = Math.min(wordCount, selectedCategories.length);
   const shuffledCategories = selectedCategories.sort(() => Math.random() - 0.5);
-  const categoriesToUse = shuffledCategories.slice(0, numCategories);
-
-  categoriesToUse.forEach(categoryName => {
+  
+  for (let i = 0; i < wordCount; i++) {
+    // Cycle through categories if we need more words than categories
+    const categoryName = shuffledCategories[i % iterations];
     const category = allCategories[categoryName];
     // Get a random subcategory
     const subcategories = Object.keys(category);
@@ -472,7 +498,7 @@ function generatePrompt(selectedCategories, allCategories) {
     const words = category[randomSubcategory];
     const randomWord = words[Math.floor(Math.random() * words.length)];
     selectedWords.push(randomWord);
-  });
+  }
 
   // Shuffle the selected words and join them
   return selectedWords.sort(() => Math.random() - 0.5).join(' ');

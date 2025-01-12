@@ -15,6 +15,11 @@
       </div>
     </div>
 
+    <div class="word-count-control">
+      <h2>Number of Words to Combine: <span id="wordCountDisplay">3</span></h2>
+      <input type="range" id="wordCountSlider" min="2" max="6" value="3" class="slider">
+    </div>
+
     <div class="controls">
       <button id="generateBtn" class="generate-btn">Generate Prompt</button>
       <button id="selectAllBtn" class="select-btn">Select All</button>
@@ -23,7 +28,10 @@
 
     <div class="output-section">
       <h2>Generated Prompt:</h2>
-      <div id="output" class="output-box"></div>
+      <div id="output" class="output-box" role="button" tabindex="0" title="Click to copy">
+        <div class="output-text"></div>
+        <div class="copy-tooltip">Click to copy</div>
+      </div>
     </div>
   </div>
   
